@@ -18,7 +18,7 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nf-c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-workflow NF-CORE-CONTAM {
+workflow NF_CORE_CONTAM {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
