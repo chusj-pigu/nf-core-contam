@@ -24,7 +24,9 @@
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+2. Classify reads with a reusable Kraken2 standard database ([`Kraken2`](https://github.com/DerrickWood/kraken2/wiki/Manual))
+3. Present QC and classification reports ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 

@@ -1,0 +1,15 @@
+name: kraken2_standard_database
+description: Reuse a complete cached Kraken2 standard database or build and publish one.
+keywords:
+  - kraken2
+  - database
+  - cache
+authors:
+  - "@chusj-pigu"
+maintainers:
+  - "@chusj-pigu"
+output:
+  db:
+    - kraken2-standard:
+        type: directory
+        description: A complete Kraken2 standard database.

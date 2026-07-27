@@ -4,7 +4,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
+include { KRAKEN2_KRAKEN2        } from '../modules/nf-core/kraken2/kraken2/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
+include { KRAKEN2_STANDARD_DATABASE } from '../subworkflows/local/kraken2_standard_database/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -34,6 +36,20 @@ workflow NF-CORE-CONTAM {
     //
     FASTQC(ch_samplesheet)
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
+
+    //
+    // MODULE: Classify reads against a reusable Kraken2 standard database
+    //
+    if (!params.skip_kraken2) {
+        KRAKEN2_STANDARD_DATABASE()
+        KRAKEN2_KRAKEN2(
+            ch_samplesheet,
+            KRAKEN2_STANDARD_DATABASE.out.db.first(),
+            params.save_kraken2_output_fastqs,
+            params.save_kraken2_read_assignments
+        )
+        ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.map { _meta, file -> file })
+    }
 
     //
     // Collate and save software versions

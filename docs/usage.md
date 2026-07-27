@@ -14,6 +14,38 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
+## Kraken2 standard-database cache
+
+Kraken2 classification requires `--kraken2_db_cache_dir`. The first run builds the
+Kraken2 standard database with `kraken2-build --standard` and publishes it as
+`<cache-directory>/kraken2-standard`. Later runs validate the cache and reuse it
+instead of downloading and building the database again.
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --kraken2_db_cache_dir /shared/kraken2-cache \
+    -profile apptainer
+```
+
+The cache is considered valid only when it has the required Kraken2 `*.k2d`
+files. The standard database is built by the maintained nf-core
+`kraken2/buildstandard` component and is published only after that task succeeds.
+Put the cache on fast shared storage that every execution node can read; do not
+initialise the same cache directory from concurrent pipeline runs.
+
+Use `--force` to deliberately rebuild and replace the cached standard database:
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --kraken2_db_cache_dir /shared/kraken2-cache \
+    --force \
+    -profile apptainer
+```
+
 ### Multiple runs of the same sample
 
 The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:

@@ -81,6 +81,49 @@
                 }
             }
         },
+        "kraken2_database_options": {
+            "title": "Kraken2 database options",
+            "type": "object",
+            "fa_icon": "fas fa-database",
+            "description": "Configure the reusable Kraken2 standard database used for contaminant classification.",
+            "properties": {
+                "kraken2_db_cache_dir": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "description": "Writable directory used to cache the Kraken2 standard database.",
+                    "help_text": "The pipeline reuses <cache>/kraken2-standard only when it contains the required Kraken2 database files. If it is absent or incomplete, the pipeline builds the standard database with the maintained nf-core component and publishes it to this directory. Use fast, shared storage that is visible to all execution nodes.",
+                    "fa_icon": "fas fa-folder-open"
+                },
+                "force": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Rebuild the Kraken2 standard database even when a complete cached database is available.",
+                    "help_text": "Use this when intentionally refreshing the standard database. The rebuilt database replaces the cached kraken2-standard directory after the build completes.",
+                    "fa_icon": "fas fa-sync-alt"
+                },
+                "skip_kraken2": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip Kraken2 classification.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-forward"
+                },
+                "save_kraken2_output_fastqs": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Save reads assigned and unassigned by Kraken2.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-save"
+                },
+                "save_kraken2_read_assignments": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Save a per-read Kraken2 classification file.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-save"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -238,6 +281,9 @@
         },
         {
             "$ref": "#/$defs/reference_genome_options"
+        },
+        {
+            "$ref": "#/$defs/kraken2_database_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"
