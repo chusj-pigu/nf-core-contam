@@ -103,8 +103,8 @@ SAMPLE_2,SAMPLE_2.fastq.gz,
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to one ONT FASTQ (`.fastq.gz` / `.fq.gz`) or uBAM (`.bam`). |
-| `fastq_2` | Required blank placeholder; paired-end reads are not supported. |
+| `fastq_1` | Full path to one ONT FASTQ (`.fastq.gz` / `.fq.gz`) or uBAM (`.bam`).                                                                                                                  |
+| `fastq_2` | Required blank placeholder; paired-end reads are not supported.                                                                                                                        |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
@@ -150,12 +150,12 @@ nextflow run chusj-pigu/nf-core-contam -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
-outdir: './results/'
-fasta: '/shared/references/GRCh38.fa'
-kraken2_db_cache_dir: '/shared/kraken2-cache'
-sylph_db: '/shared/sylph/database.syldb'
-sylph_taxonomy: '/shared/sylph/taxonomy.tsv.gz'
+input: "./samplesheet.csv"
+outdir: "./results/"
+fasta: "/shared/references/GRCh38.fa"
+kraken2_db_cache_dir: "/shared/kraken2-cache"
+sylph_db: "/shared/sylph/database.syldb"
+sylph_taxonomy: "/shared/sylph/taxonomy.tsv.gz"
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).

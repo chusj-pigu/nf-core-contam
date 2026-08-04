@@ -5,7 +5,9 @@ nextflow_pipeline {
     tag "pipeline"
     tag "ubam"
 
-    test("-profile test_ubam") {
+    test("uBAM input") {
+
+        config "../conf/test_ubam.config"
 
         when {
             params {
@@ -24,6 +26,7 @@ nextflow_pipeline {
                 { assert unmapped_reads.exists() },
                 { assert !fastqc.exists() },
                 { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf-core-contam_software_mqc_versions.yml"),
                     getAllFilesFromDir("$outputDir/minimap2", relative: true, includeDir: true),
                     getAllFilesFromDir("$outputDir/samtools", relative: true, includeDir: true)
                 ).match() }

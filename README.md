@@ -24,6 +24,7 @@
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
+
 1. Align ONT reads to a human reference and retain only primary unmapped reads ([`minimap2`](https://github.com/lh3/minimap2))
 2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 3. Classify unmapped reads with a reusable Kraken2 standard database ([`Kraken2`](https://github.com/DerrickWood/kraken2/wiki/Manual))

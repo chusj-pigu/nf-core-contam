@@ -5,7 +5,9 @@ nextflow_pipeline {
     tag "pipeline"
     tag "sylph"
 
-    test("-profile test_sylph") {
+    test("Sylph and MultiQC") {
+
+        config "../conf/test_sylph.config"
 
         when {
             params {
@@ -30,6 +32,7 @@ nextflow_pipeline {
                 { assert multiqc_sylphtax.exists() },
                 { assert multiqc_sylphtax.readLines().size() > 0 },
                 { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf-core-contam_software_mqc_versions.yml"),
                     getAllFilesFromDir(aligned_reads.toString(), relative: true, includeDir: true),
                     getAllFilesFromDir("$outputDir/samtools", relative: true, includeDir: true),
                     getAllFilesFromDir(sylph_profile.toString(), relative: true, includeDir: true),

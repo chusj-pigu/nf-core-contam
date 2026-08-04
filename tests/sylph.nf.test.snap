@@ -1,6 +1,29 @@
 {
-    "-profile test_sylph": {
+    "Sylph and MultiQC": {
         "content": [
+            {
+                "FASTQC": {
+                    "fastqc": "0.12.1"
+                },
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.30-r1287"
+                },
+                "SAMTOOLS_FASTQ": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_VIEW": {
+                    "samtools": 1.24
+                },
+                "SYLPHTAX_TAXPROF": {
+                    "sylph-tax": "1.9.0"
+                },
+                "SYLPH_PROFILE": {
+                    "sylph": "0.9.0"
+                },
+                "Workflow": {
+                    "chusj-pigu/nf-core-contam": "v1.0.0dev"
+                }
+            },
             [
                 "",
                 "test.human.bam"
@@ -24,7 +47,7 @@
                 "test\t{'tax_rank': 'r', 'taxonomy': 'Riboviria', 'rel_abundance': 100.0}\t{'tax_rank': 'k', 'taxonomy': 'Orthornavirae', 'rel_abundance': 100.0}\t{'tax_rank': 'p', 'taxonomy': 'Pisuviricota', 'rel_abundance': 100.0}\t{'tax_rank': 'c', 'taxonomy': 'Pisoniviricetes', 'rel_abundance': 100.0}\t{'tax_rank': 'o', 'taxonomy': 'Nidovirales', 'rel_abundance': 100.0}\t{'tax_rank': 'f', 'taxonomy': 'Coronaviridae', 'rel_abundance': 100.0}\t{'tax_rank': 'g', 'taxonomy': 'Betacoronavirus', 'rel_abundance': 100.0}\t{'tax_rank': 's', 'taxonomy': 'Severe acute respiratory syndrome-related coronavirus', 'rel_abundance': 100.0}\t{'tax_rank': 't', 'taxonomy': 'MT192765.1', 'rel_abundance': 100.0}"
             ]
         ],
-        "timestamp": "2026-08-04T12:38:22.392161886",
+        "timestamp": "2026-08-04T13:22:36.91431816",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"
