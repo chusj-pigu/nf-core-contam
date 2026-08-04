@@ -24,9 +24,11 @@
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/community/brand/workflow-schematics#examples for examples.   -->
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Classify reads with a reusable Kraken2 standard database ([`Kraken2`](https://github.com/DerrickWood/kraken2/wiki/Manual))
-3. Present QC and classification reports ([`MultiQC`](http://multiqc.info/))
+1. Align ONT reads to a human reference and retain only primary unmapped reads ([`minimap2`](https://github.com/lh3/minimap2))
+2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+3. Classify unmapped reads with a reusable Kraken2 standard database ([`Kraken2`](https://github.com/DerrickWood/kraken2/wiki/Manual))
+4. Profile unmapped microbial reads with Sylph ([`Sylph`](https://github.com/bluenote-1577/sylph))
+5. Present QC and classifier reports ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
@@ -57,7 +59,11 @@ Now, you can run the pipeline using:
 nextflow run chusj-pigu/nf-core-contam \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
-   --outdir <OUTDIR>
+   --outdir <OUTDIR> \
+   --fasta <HUMAN_REFERENCE.fa> \
+   --kraken2_db_cache_dir <KRAKEN2_CACHE_DIR> \
+   --sylph_db <SYLPH_DATABASE.syldb> \
+   --sylph_taxonomy <SYLPH_TAXONOMY.tsv.gz>
 ```
 
 > [!WARNING]

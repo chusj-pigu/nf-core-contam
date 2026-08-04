@@ -12,9 +12,30 @@ The directories listed below will be created in the results directory after the 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
+- [Human read depletion](#human-read-depletion) - Align to the human reference and retain primary unmapped reads
 - [FastQC](#fastqc) - Raw read QC
+- [Kraken2](#kraken2) - K-mer classification of unmapped reads against the standard database
+- [Sylph](#sylph) - ANI-aware microbial profiling of unmapped reads
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
+
+### Human read depletion
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `minimap2/`
+  - `*.human.bam`: Coordinate-sorted alignments against the supplied human reference.
+- `samtools/`
+  - `*.unmapped.bam`: Primary records without a human alignment.
+  - `*.unmapped_other.fastq.gz`: Unmapped ONT reads passed to Kraken2 and Sylph.
+
+</details>
+
+The pipeline aligns all input reads with minimap2, retains only records with the
+SAM unmapped flag, and excludes secondary and supplementary records. This is a
+host-depletion step: a taxonomic hit in the remaining reads is a candidate signal,
+not by itself confirmation of contamination.
 
 ### FastQC
 
@@ -27,7 +48,34 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 </details>
 
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about raw FASTQ inputs. It is not run for uBAM input. It provides information about the quality score distribution across reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+
+### Kraken2
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `kraken2/`
+  - `*.report`: Per-sample Kraken2 taxonomic classification reports.
+
+</details>
+
+Kraken2 reports are included in the final MultiQC report.
+
+### Sylph
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `sylph/`
+  - `*.tsv`: Per-sample Sylph profiles with abundance and adjusted ANI estimates.
+- `sylphtax/`
+  - `*.sylphmpa`: Per-sample taxonomic abundance profiles used by MultiQC.
+
+</details>
+
+The final MultiQC report presents the `*.sylphmpa` files in its interactive
+Sylph-tax section.
 
 ### MultiQC
 

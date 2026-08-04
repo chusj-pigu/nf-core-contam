@@ -17,8 +17,8 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
+                "pattern": "^([\\S\\s]*\\/)?[^\\s\\/]+\\.(f(ast)?q\\.gz|bam)$",
+                "errorMessage": "An ONT FASTQ or uBAM must be provided in fastq_1, without spaces, ending in '.fq.gz', '.fastq.gz', or '.bam'"
             },
             "fastq_2": {
                 "type": "string",

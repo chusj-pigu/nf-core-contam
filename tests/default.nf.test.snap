@@ -5,24 +5,25 @@
                 "FASTQC": {
                     "fastqc": "0.12.1"
                 },
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.30-r1287"
+                },
+                "SAMTOOLS_FASTQ": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_VIEW": {
+                    "samtools": 1.24
+                },
                 "Workflow": {
                     "chusj-pigu/nf-core-contam": "v1.0.0dev"
                 }
             },
             [
                 "fastqc",
-                "fastqc/SAMPLE1_PE_1_fastqc.html",
-                "fastqc/SAMPLE1_PE_1_fastqc.zip",
-                "fastqc/SAMPLE1_PE_2_fastqc.html",
-                "fastqc/SAMPLE1_PE_2_fastqc.zip",
-                "fastqc/SAMPLE2_PE_1_fastqc.html",
-                "fastqc/SAMPLE2_PE_1_fastqc.zip",
-                "fastqc/SAMPLE2_PE_2_fastqc.html",
-                "fastqc/SAMPLE2_PE_2_fastqc.zip",
-                "fastqc/SAMPLE3_SE_1_fastqc.html",
-                "fastqc/SAMPLE3_SE_1_fastqc.zip",
-                "fastqc/SAMPLE3_SE_2_fastqc.html",
-                "fastqc/SAMPLE3_SE_2_fastqc.zip",
+                "fastqc/test_fastqc.html",
+                "fastqc/test_fastqc.zip",
+                "minimap2",
+                "minimap2/test.human.bam",
                 "multiqc",
                 "multiqc/multiqc_data",
                 "multiqc/multiqc_data/fastqc-status-check-heatmap.txt",
@@ -87,25 +88,35 @@
                 "multiqc/multiqc_plots/svg/fastqc_top_overrepresented_sequences_table.svg",
                 "multiqc/multiqc_report.html",
                 "pipeline_info",
-                "pipeline_info/nf-core-contam_software_mqc_versions.yml"
+                "pipeline_info/nf-core-contam_software_mqc_versions.yml",
+                "samtools",
+                "samtools/test.unmapped.bam",
+                "samtools/test.unmapped_1.fastq.gz",
+                "samtools/test.unmapped_other.fastq.gz",
+                "samtools/test.unmapped_singleton.fastq.gz"
             ],
             [
-                "fastqc-status-check-heatmap.txt:md5,0f1975c565a16bf09be08a05c204ded7",
-                "fastqc_overrepresented_sequences_plot.txt:md5,4b23cea39c4e23deef6b97810bc1ee46",
-                "fastqc_per_base_n_content_plot.txt:md5,037692101c0130c72493d3bbfa3afac1",
-                "fastqc_per_base_sequence_quality_plot.txt:md5,bfe735f3e31befe13bdf6761bb297d6e",
-                "fastqc_per_sequence_gc_content_plot_Counts.txt:md5,7108d19c46ef7883e864ba274c457d2e",
-                "fastqc_per_sequence_gc_content_plot_Percentages.txt:md5,23f527c80a148e4f34e5a43f6e520a90",
-                "fastqc_per_sequence_quality_scores_plot.txt:md5,a0cc0e6df7bfb05257da1cfc88b13c50",
-                "fastqc_sequence_counts_plot.txt:md5,c6e4e1588e6765fe8df27812a1322fbd",
-                "fastqc_sequence_duplication_levels_plot.txt:md5,3cde2db4033f6c64648976d1174db925",
-                "fastqc_sequence_length_distribution_plot.txt:md5,e82b9b14a7e24c0c5f27af97cebb6870",
+                "test.human.bam:md5,836b3e6c40f32a7157d62aa1e267298a",
+                "fastqc-status-check-heatmap.txt:md5,79096e510a80228d8346d5bf54165375",
+                "fastqc_overrepresented_sequences_plot.txt:md5,7fdacee24427a4e5d527955bd498d9a0",
+                "fastqc_per_base_n_content_plot.txt:md5,e82787c8caebfae443493e5af1860e47",
+                "fastqc_per_base_sequence_quality_plot.txt:md5,5f1e21c3ad7bf2d027fe49ce65062abd",
+                "fastqc_per_sequence_gc_content_plot_Counts.txt:md5,7d4e5db59b0ef90edd47ddde983dda78",
+                "fastqc_per_sequence_gc_content_plot_Percentages.txt:md5,9502f3104aa1276c6d8fe598afc74b11",
+                "fastqc_per_sequence_quality_scores_plot.txt:md5,2b5b1f12887d426fb16cf5a68a042f7e",
+                "fastqc_sequence_counts_plot.txt:md5,bcf44b3f13af7594010697e1e8b1273c",
+                "fastqc_sequence_duplication_levels_plot.txt:md5,310cf1c6a9b689e4584c44d3c3ef5a50",
+                "fastqc_sequence_length_distribution_plot.txt:md5,ee04b893afde4d1d80b51e5755b22706",
                 "multiqc_citations.txt:md5,4c806e63a283ec1b7e78cdae3a923d4f",
-                "multiqc_fastqc.txt:md5,1a41c2158adc9947bff9232962f70110",
-                "multiqc_general_stats.txt:md5,0b54e4e764665bd57fe0f95216744a78"
+                "multiqc_fastqc.txt:md5,7dd7f0893213416b94b41cf7e642d1ae",
+                "multiqc_general_stats.txt:md5,111143cd1cec9f7ca59f6c27565aaf3b",
+                "test.unmapped.bam:md5,d71d27b4ba3e47e6d09036d33a899b86",
+                "test.unmapped_1.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e",
+                "test.unmapped_other.fastq.gz:md5,bd7ab2f9ea96290e58e868e4aabccf1f",
+                "test.unmapped_singleton.fastq.gz:md5,d41d8cd98f00b204e9800998ecf8427e"
             ]
         ],
-        "timestamp": "2026-07-27T15:19:55.537256907",
+        "timestamp": "2026-08-04T12:39:22.963762431",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "25.10.4"

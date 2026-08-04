@@ -1,0 +1,42 @@
+nextflow_pipeline {
+
+    name "Test human read depletion, Sylph and MultiQC integration"
+    script "../main.nf"
+    tag "pipeline"
+    tag "sylph"
+
+    test("-profile test_sylph") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            def sylph_profile = path("$outputDir/sylph")
+            def sylph_taxonomy = path("$outputDir/sylphtax")
+            def aligned_reads = path("$outputDir/minimap2")
+            def unmapped_reads = path("$outputDir/samtools/test.unmapped_other.fastq.gz")
+            def multiqc_sylphtax = path("$outputDir/multiqc/multiqc_data/multiqc_sylphtax.txt")
+
+            assertAll(
+                { assert workflow.success },
+                { assert aligned_reads.exists() },
+                { assert unmapped_reads.exists() },
+                { assert unmapped_reads.linesGzip.size() > 0 },
+                { assert sylph_profile.exists() },
+                { assert sylph_taxonomy.exists() },
+                { assert multiqc_sylphtax.exists() },
+                { assert multiqc_sylphtax.readLines().size() > 0 },
+                { assert snapshot(
+                    getAllFilesFromDir(aligned_reads.toString(), relative: true, includeDir: true),
+                    getAllFilesFromDir("$outputDir/samtools", relative: true, includeDir: true),
+                    getAllFilesFromDir(sylph_profile.toString(), relative: true, includeDir: true),
+                    getAllFilesFromDir(sylph_taxonomy.toString(), relative: true, includeDir: true),
+                    multiqc_sylphtax.readLines()
+                ).match() }
+            )
+        }
+    }
+}

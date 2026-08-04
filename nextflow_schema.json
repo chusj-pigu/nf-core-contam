@@ -47,7 +47,7 @@
             "title": "Reference genome options",
             "type": "object",
             "fa_icon": "fas fa-dna",
-            "description": "Reference genome related files and options required for the workflow.",
+            "description": "Human reference genome and alignment options used to remove host-derived reads before classification.",
             "properties": {
                 "genome": {
                     "type": "string",
@@ -61,9 +61,17 @@
                     "exists": true,
                     "mimetype": "text/plain",
                     "pattern": "^\\S+\\.fn?a(sta)?(\\.gz)?$",
-                    "description": "Path to FASTA genome file.",
-                    "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
+                    "description": "Path to a human reference genome FASTA.",
+                    "help_text": "Required when `--genome` is not specified. Input reads are aligned to this human reference with minimap2; only primary unmapped reads are classified by Kraken2 and Sylph.",
                     "fa_icon": "far fa-file-code"
+                },
+                "minimap2_preset": {
+                    "type": "string",
+                    "default": "lr:hq",
+                    "pattern": "^\\S+$",
+                    "description": "Minimap2 preset for ONT human-reference alignment.",
+                    "help_text": "Defaults to `lr:hq` for high-quality ONT reads. Set to another minimap2 preset, such as `map-ont`, only when appropriate for the basecalling quality and study design.",
+                    "fa_icon": "fas fa-sliders-h"
                 },
                 "igenomes_ignore": {
                     "type": "boolean",
@@ -121,6 +129,38 @@
                     "description": "Save a per-read Kraken2 classification file.",
                     "hidden": true,
                     "fa_icon": "fas fa-save"
+                }
+            }
+        },
+        "sylph_database_options": {
+            "title": "Sylph database options",
+            "type": "object",
+            "fa_icon": "fas fa-database",
+            "description": "Configure the pre-sketched Sylph database and its matching taxonomy metadata.",
+            "properties": {
+                "sylph_db": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "pattern": "^\\S+\\.(syldb|sylsp|f(ast)?a|fna|fa)(\\.gz)?$",
+                    "description": "Path to a Sylph database or a raw FASTA reference collection.",
+                    "help_text": "Required unless --skip_sylph is specified. Use a pre-sketched *.syldb database for production. A small raw FASTA collection is also accepted and will be sketched by Sylph. The database must contain the taxa of interest and match the file supplied with --sylph_taxonomy.",
+                    "fa_icon": "fas fa-database"
+                },
+                "sylph_taxonomy": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Path to taxonomy metadata matching the Sylph database.",
+                    "help_text": "Required unless --skip_sylph is specified. It is used by sylph-tax to produce the taxonomic profile consumed by MultiQC.",
+                    "fa_icon": "fas fa-sitemap"
+                },
+                "skip_sylph": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip Sylph profiling and its MultiQC section.",
+                    "hidden": true,
+                    "fa_icon": "fas fa-forward"
                 }
             }
         },
@@ -284,6 +324,9 @@
         },
         {
             "$ref": "#/$defs/kraken2_database_options"
+        },
+        {
+            "$ref": "#/$defs/sylph_database_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

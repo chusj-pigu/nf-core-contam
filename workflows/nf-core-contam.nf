@@ -6,6 +6,9 @@
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { KRAKEN2_KRAKEN2        } from '../modules/nf-core/kraken2/kraken2/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
+include { SYLPH_PROFILE          } from '../modules/nf-core/sylph/profile/main'
+include { SYLPHTAX_TAXPROF       } from '../modules/nf-core/sylphtax/taxprof/main'
+include { HUMAN_READ_DEPLETION   } from '../subworkflows/local/human_read_depletion/main'
 include { KRAKEN2_STANDARD_DATABASE } from '../subworkflows/local/kraken2_standard_database/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -31,10 +34,24 @@ workflow NF_CORE_CONTAM {
 
     def ch_versions = channel.empty()
     def ch_multiqc_files = channel.empty()
+
+    //
+    // SUBWORKFLOW: Deplete reads that align to the human reference
+    //
+    def ch_human_reference = channel.value([
+        [id: params.genome ?: 'human'],
+        file(params.fasta, checkIfExists: true)
+    ])
+    HUMAN_READ_DEPLETION(ch_samplesheet, ch_human_reference)
+    def ch_unmapped_reads = HUMAN_READ_DEPLETION.out.unmapped_reads
+
     //
     // MODULE: Run FastQC
     //
-    FASTQC(ch_samplesheet)
+    def ch_fastq_samples = ch_samplesheet.filter { _meta, reads ->
+        reads.every { read -> read.name.matches('.*\\.f(ast)?q\\.gz$') }
+    }
+    FASTQC(ch_fastq_samples)
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
 
     //
@@ -43,12 +60,31 @@ workflow NF_CORE_CONTAM {
     if (!params.skip_kraken2) {
         KRAKEN2_STANDARD_DATABASE()
         KRAKEN2_KRAKEN2(
-            ch_samplesheet,
+            ch_unmapped_reads,
             KRAKEN2_STANDARD_DATABASE.out.db.first(),
             params.save_kraken2_output_fastqs,
             params.save_kraken2_read_assignments
         )
         ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.map { _meta, file -> file })
+    }
+
+    //
+    // MODULES: Profile reads with Sylph and add taxonomic abundances to MultiQC
+    //
+    if (!params.skip_sylph) {
+        if (!params.sylph_db) {
+            error('A Sylph database is required. Set --sylph_db to a pre-sketched *.syldb file or use --skip_sylph.')
+        }
+        if (!params.sylph_taxonomy) {
+            error('Sylph taxonomy metadata is required. Set --sylph_taxonomy to the file matching --sylph_db or use --skip_sylph.')
+        }
+
+        def ch_sylph_db = channel.value(file(params.sylph_db, checkIfExists: true))
+        def ch_sylph_taxonomy = channel.value(file(params.sylph_taxonomy, checkIfExists: true))
+
+        SYLPH_PROFILE(ch_unmapped_reads, ch_sylph_db)
+        SYLPHTAX_TAXPROF(SYLPH_PROFILE.out.profile_out, ch_sylph_taxonomy)
+        ch_multiqc_files = ch_multiqc_files.mix(SYLPHTAX_TAXPROF.out.taxprof_output.map { _meta, file -> file })
     }
 
     //

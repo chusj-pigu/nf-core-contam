@@ -1,0 +1,33 @@
+name: human_read_depletion
+description: Align reads to a human reference and recover primary unmapped reads as compressed FASTQ.
+keywords:
+  - human
+  - depletion
+  - minimap2
+  - samtools
+  - unmapped
+  - fastq
+input:
+  - reads:
+      type: file
+      description: ONT reads to align to the human reference.
+  - reference:
+      type: file
+      description: Human reference genome FASTA.
+output:
+  aligned_bam:
+    - "*.bam":
+        type: file
+        description: Coordinate-sorted alignments against the human reference.
+  unmapped_bam:
+    - "*.unmapped.bam":
+        type: file
+        description: Primary reads without a human alignment.
+  unmapped_reads:
+    - "*.unmapped_other.fastq.gz":
+        type: file
+        description: Primary unmapped ONT reads in compressed FASTQ format.
+authors:
+  - "@chusj-pigu"
+maintainers:
+  - "@chusj-pigu"

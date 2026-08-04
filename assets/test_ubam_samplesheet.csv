@@ -1,0 +1,2 @@
+sample,fastq_1,fastq_2
+test,https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/illumina/bam/test3.single_end.markduplicates.sorted.bam,

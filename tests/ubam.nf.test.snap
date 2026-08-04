@@ -1,0 +1,22 @@
+{
+    "-profile test_ubam": {
+        "content": [
+            [
+                "",
+                "test.human.bam"
+            ],
+            [
+                "",
+                "test.unmapped.bam",
+                "test.unmapped_1.fastq.gz",
+                "test.unmapped_other.fastq.gz",
+                "test.unmapped_singleton.fastq.gz"
+            ]
+        ],
+        "timestamp": "2026-08-04T12:45:29.819983602",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}
