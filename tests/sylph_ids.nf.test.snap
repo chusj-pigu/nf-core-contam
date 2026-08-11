@@ -1,0 +1,37 @@
+{
+    "Multiple official IDs populate the local cache and reach MultiQC": {
+        "content": [
+            {
+                "FASTQC": {
+                    "fastqc": "0.12.1"
+                },
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.30-r1287"
+                },
+                "SAMTOOLS_FASTQ": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_VIEW": {
+                    "samtools": 1.24
+                },
+                "SYLPHTAX_TAXPROF_IDS": {
+                    "sylph-tax": "1.9.0"
+                },
+                "SYLPH_PROFILE_IDS": {
+                    "sylph": "0.9.0"
+                },
+                "WGET": {
+                    "wget": "1.21.4"
+                },
+                "Workflow": {
+                    "chusj-pigu/nf-core-contam": "v1.0.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-08-11T14:13:20.362580064",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

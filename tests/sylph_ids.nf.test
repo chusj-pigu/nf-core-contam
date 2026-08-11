@@ -1,0 +1,41 @@
+nextflow_pipeline {
+
+    name "Test automatic cached Sylph identifier provisioning"
+    script "../main.nf"
+    tag "pipeline"
+    tag "sylph_ids"
+
+    test("Multiple official IDs populate the local cache and reach MultiQC") {
+
+        config "../conf/test_sylph_ids.config"
+        options "-stub"
+
+        when {
+            params {
+                outdir = "$outputDir"
+                sylph_db_cache_dir = "$outputDir/sylph-cache-v2"
+            }
+        }
+
+        then {
+            def gtdb_database = path("$outputDir/sylph-cache-v2/gtdb-r226-c200-dbv1.syldb")
+            def imgvr_database = path("$outputDir/sylph-cache-v2/imgvr_c200_v0.3.0.syldb")
+            def gtdb_taxonomy = path("$outputDir/sylph-cache-v2/taxonomy/gtdb_r226_metadata.tsv.gz")
+            def imgvr_taxonomy = path("$outputDir/sylph-cache-v2/taxonomy/IMGVR_4.1_metadata.tsv.gz")
+            def sylph_taxonomy = path("$outputDir/sylphtax")
+            def multiqc_report = path("$outputDir/multiqc/multiqc_report.html")
+            def versions = path("$outputDir/pipeline_info/nf-core-contam_software_mqc_versions.yml")
+
+            assertAll(
+                { assert workflow.success },
+                { assert gtdb_database.exists() && gtdb_database.size() > 0 },
+                { assert imgvr_database.exists() && imgvr_database.size() > 0 },
+                { assert gtdb_taxonomy.exists() && gtdb_taxonomy.size() > 0 },
+                { assert imgvr_taxonomy.exists() && imgvr_taxonomy.size() > 0 },
+                { assert sylph_taxonomy.exists() },
+                { assert multiqc_report.exists() },
+                { assert snapshot(removeNextflowVersion(versions.toString())).match() }
+            )
+        }
+    }
+}

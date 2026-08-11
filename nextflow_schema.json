@@ -156,6 +156,19 @@
                     "help_text": "Required unless --skip_sylph is specified. It is used by sylph-tax to produce the taxonomic profile consumed by MultiQC.",
                     "fa_icon": "fas fa-sitemap"
                 },
+                "sylph_db_ids": {
+                    "type": "string",
+                    "pattern": "^\\S+(,\\S+)*$",
+                    "description": "One or more official Sylph-tax database identifiers, separated by commas.",
+                    "help_text": "For example, GTDB_r232,IMGVR_4.1. Database sketches and matching Sylph-tax metadata are downloaded once to --sylph_db_cache_dir. This cannot be combined with --sylph_db or --sylph_taxonomy.",
+                    "fa_icon": "fas fa-download"
+                },
+                "sylph_db_cache_dir": {
+                    "type": "string",
+                    "description": "Persistent shared cache for automatically downloaded Sylph resources.",
+                    "help_text": "Required with --sylph_db_ids. Download tasks run with the local executor and reuse non-empty cache files on later runs.",
+                    "fa_icon": "fas fa-folder"
+                },
                 "skip_sylph": {
                     "type": "boolean",
                     "default": false,

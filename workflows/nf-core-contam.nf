@@ -8,6 +8,12 @@ include { KRAKEN2_KRAKEN2           } from '../modules/nf-core/kraken2/kraken2/m
 include { MULTIQC                   } from '../modules/nf-core/multiqc/main'
 include { SYLPH_PROFILE             } from '../modules/nf-core/sylph/profile/main'
 include { SYLPHTAX_TAXPROF          } from '../modules/nf-core/sylphtax/taxprof/main'
+include { WGET                      } from '../modules/nf-core/wget/main'
+include { SYLPH_CACHE_DIRECTORY     } from '../modules/local/sylph/cache_directory/main'
+include { SYLPH_CACHE_INSTALL       } from '../modules/local/sylph/cache_install/main'
+include { SYLPH_PROFILE_IDS          } from '../modules/local/sylph/profile_ids/main'
+include { SYLPHTAX_DOWNLOAD         } from '../modules/local/sylphtax/download/main'
+include { SYLPHTAX_TAXPROF_IDS      } from '../modules/local/sylphtax/taxprof_ids/main'
 include { VOYAGER_PROFILE           } from '../modules/local/voyager/profile/main'
 include { HUMAN_READ_DEPLETION      } from '../subworkflows/local/human_read_depletion/main'
 include { KRAKEN2_STANDARD_DATABASE } from '../subworkflows/local/kraken2_standard_database/main'
@@ -72,19 +78,61 @@ workflow NF_CORE_CONTAM {
     // MODULES: Profile reads with Sylph and add taxonomic abundances to MultiQC
     //
     if (!params.skip_sylph) {
-        if (!params.sylph_db) {
-            error('A Sylph database is required. Set --sylph_db to a pre-sketched *.syldb file or use --skip_sylph.')
-        }
-        if (!params.sylph_taxonomy) {
-            error('Sylph taxonomy metadata is required. Set --sylph_taxonomy to the file matching --sylph_db or use --skip_sylph.')
-        }
+        if (params.sylph_db_ids) {
+            if (params.sylph_db || params.sylph_taxonomy) {
+                error('Use either --sylph_db_ids with --sylph_db_cache_dir, or the manual --sylph_db and --sylph_taxonomy inputs, not both.')
+            }
+            if (!params.sylph_db_cache_dir) {
+                error('--sylph_db_cache_dir is required when using --sylph_db_ids.')
+            }
 
-        def ch_sylph_db = channel.value(file(params.sylph_db, checkIfExists: true))
-        def ch_sylph_taxonomy = channel.value(file(params.sylph_taxonomy, checkIfExists: true))
+            SYLPH_CACHE_DIRECTORY(channel.value(params.sylph_db_cache_dir))
+            def ch_sylph_cache_dir = SYLPH_CACHE_DIRECTORY.out.cache_dir
+            def database_ids = params.sylph_db_ids.split(',').collect { identifier -> identifier.trim() }.findAll { identifier -> identifier }
+            def database_specs = database_ids.collect { identifier -> sylphDatabaseSpec(identifier, params.sylph_db_cache_dir) }
+            def cached_specs = database_specs.findAll { spec -> new File(spec.cache_path).isFile() && new File(spec.cache_path).length() > 0 }
+            def missing_specs = database_specs - cached_specs
+            def ch_cached_databases = channel.fromList(cached_specs).map { spec -> spec.cache_path }
 
-        SYLPH_PROFILE(ch_unmapped_reads, ch_sylph_db)
-        SYLPHTAX_TAXPROF(SYLPH_PROFILE.out.profile_out, ch_sylph_taxonomy)
-        ch_multiqc_files = ch_multiqc_files.mix(SYLPHTAX_TAXPROF.out.taxprof_output.map { _meta, file -> file })
+            WGET(channel.fromList(missing_specs).map { spec -> [[id: spec.filename - '.syldb'], spec.url, 'syldb'] })
+            SYLPH_CACHE_INSTALL(
+                WGET.out.outfile
+                    .combine(ch_sylph_cache_dir)
+                    .map { meta, asset, cache_dir -> [meta, asset, "${cache_dir}/${meta.id}.syldb"] }
+            )
+            def ch_sylph_databases = ch_cached_databases
+                .mix(SYLPH_CACHE_INSTALL.out.cache_path.map { _meta, cache_path -> cache_path })
+                .map { cache_path -> file(cache_path, checkIfExists: true) }
+                .collect()
+
+            def taxonomy_dir = "${params.sylph_db_cache_dir}/taxonomy"
+            def required_taxonomy_files = database_specs.collect { spec -> spec.taxonomy_file }.unique()
+            def taxonomy_is_cached = required_taxonomy_files.every { taxonomy_file -> new File("${taxonomy_dir}/${taxonomy_file}").isFile() && new File("${taxonomy_dir}/${taxonomy_file}").length() > 0 }
+            def ch_taxonomy_dir
+            if (taxonomy_is_cached) {
+                ch_taxonomy_dir = channel.value(taxonomy_dir)
+            } else {
+                SYLPHTAX_DOWNLOAD(ch_sylph_cache_dir.map { cache_dir -> ["${cache_dir}/taxonomy", required_taxonomy_files] })
+                ch_taxonomy_dir = SYLPHTAX_DOWNLOAD.out.taxonomy_dir
+            }
+
+            SYLPH_PROFILE_IDS(ch_unmapped_reads, ch_sylph_databases)
+            SYLPHTAX_TAXPROF_IDS(SYLPH_PROFILE_IDS.out.profile_out, channel.value(database_ids), ch_taxonomy_dir)
+            ch_multiqc_files = ch_multiqc_files.mix(SYLPHTAX_TAXPROF_IDS.out.taxprof_output.map { _meta, file -> file })
+        } else {
+            if (!params.sylph_db) {
+                error('A Sylph database is required. Set --sylph_db_ids with --sylph_db_cache_dir, provide a manual --sylph_db and --sylph_taxonomy pair, or use --skip_sylph.')
+            }
+            if (!params.sylph_taxonomy) {
+                error('Sylph taxonomy metadata is required with --sylph_db. Use --sylph_db_ids to download official metadata, provide --sylph_taxonomy, or use --skip_sylph.')
+            }
+
+            def ch_sylph_db = channel.value(file(params.sylph_db, checkIfExists: true))
+            def ch_sylph_taxonomy = channel.value(file(params.sylph_taxonomy, checkIfExists: true))
+            SYLPH_PROFILE(ch_unmapped_reads, ch_sylph_db)
+            SYLPHTAX_TAXPROF(SYLPH_PROFILE.out.profile_out, ch_sylph_taxonomy)
+            ch_multiqc_files = ch_multiqc_files.mix(SYLPHTAX_TAXPROF.out.taxprof_output.map { _meta, file -> file })
+        }
     }
 
     //
@@ -167,4 +215,28 @@ workflow NF_CORE_CONTAM {
     emit:
     multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions // channel: [ path(versions.yml) ]
+}
+
+def sylphDatabaseSpec(database_id, cache_dir) {
+    def databases = [
+        'GTDB_r232': [filename: 'gtdb-r232-c200-dbv1.syldb', taxonomy_file: 'gtdb_r232_metadata.tsv.gz'],
+        'GTDB_r226': [filename: 'gtdb-r226-c200-dbv1.syldb', taxonomy_file: 'gtdb_r226_metadata.tsv.gz'],
+        'GTDB_r220': [filename: 'gtdb-r220-c200-dbv1.syldb', taxonomy_file: 'gtdb_r220_metadata.tsv.gz'],
+        'GTDB_r214': [filename: 'v0.3-c200-gtdb-r214.syldb', taxonomy_file: 'gtdb_r214_metadata.tsv.gz'],
+        'GlobDB_r232': [filename: 'globdb_r232_sylph_c200.syldb', taxonomy_file: 'globdb_r232_metadata.tsv.gz', url: 'https://fileshare.lisc.univie.ac.at/globdb/globdb_r232/taxonomic_profiling/globdb_r232_sylph_c200.syldb'],
+        'GlobDB_r226': [filename: 'globdb_r226_sylph_c200.syldb', taxonomy_file: 'globdb_r226_metadata.tsv.gz', url: 'https://fileshare.lisc.univie.ac.at/globdb/globdb_r226/taxonomic_profiling/globdb_r226_sylph_c200.syldb'],
+        'OceanDNA': [filename: 'OceanDNA-c200-v0.3.syldb', taxonomy_file: 'ocean_dna_metadata.tsv.gz'],
+        'SoilSMAG': [filename: 'SMAG-c200-v0.3.syldb', taxonomy_file: 'soil_smag_metadata.tsv.gz'],
+        'IMGVR_4.1': [filename: 'imgvr_c200_v0.3.0.syldb', taxonomy_file: 'IMGVR_4.1_metadata.tsv.gz'],
+        'UHGV_default': [filename: 'uhgv_c200_dbv1.syldb', taxonomy_file: 'uhgv_default_metadata.tsv.gz'],
+        'UHGV_ictv': [filename: 'uhgv_c200_dbv1.syldb', taxonomy_file: 'uhgv_ictv_metadata.tsv.gz'],
+        'FungiRefSeq-latest': [filename: 'fungi-refseq-2025-10-11-c200-dbv1.syldb', taxonomy_file: 'fungi_refseq_2025-10-11_metadata.tsv.gz'],
+        'FungiRefSeq-2024-07-25': [filename: 'fungi-refseq-2024-07-25-c200-dbv1.syldb', taxonomy_file: 'fungi_refseq_2024-07-25_metadata.tsv.gz'],
+        'TaraEukaryoticSMAG': [filename: 'tara-eukmags-c200-v0.3.syldb', taxonomy_file: 'tara_SMAGs_metadata.tsv.gz'],
+    ]
+    if (!databases.containsKey(database_id)) {
+        error("Unsupported Sylph database ID '${database_id}'. Supported IDs: ${databases.keySet().join(', ')}")
+    }
+    def database = databases[database_id]
+    return [id: database_id, filename: database.filename, taxonomy_file: database.taxonomy_file, cache_path: "${cache_dir}/${database.filename}", url: database.url ?: "https://storage.googleapis.com/sylph-stuff/${database.filename}"]
 }

@@ -94,6 +94,34 @@ The taxonomy file must match the genomes in `--sylph_db`; otherwise Sylph-tax
 cannot assign the profile to taxa. To run only the Kraken2 branch, specify
 `--skip_sylph true`.
 
+### Official cached databases
+
+For official Sylph-tax databases, provide one identifier or a comma-separated
+list through `--sylph_db_ids` and a persistent shared cache directory. The
+pipeline downloads missing database sketches and Sylph-tax metadata only once,
+using the local executor, then reuses non-empty cached files on subsequent
+runs. For example, this profiles against the GTDB prokaryote and IMG/VR viral
+databases:
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --sylph_db_ids GTDB_r232,IMGVR_4.1 \
+    --sylph_db_cache_dir /shared/contam-cache/sylph \
+    -profile apptainer
+```
+
+Supported identifiers are `GTDB_r232`, `GTDB_r226`, `GTDB_r220`, `GTDB_r214`,
+`GlobDB_r232`, `GlobDB_r226`, `OceanDNA`, `SoilSMAG`, `IMGVR_4.1`,
+`UHGV_default`, `UHGV_ictv`, `FungiRefSeq-latest`,
+`FungiRefSeq-2024-07-25`, and `TaraEukaryoticSMAG`. `GlobDB` sketches are
+downloaded from their official University of Vienna host. Other sketches use
+the official Sylph mirror. Database identifiers and their matching taxonomy
+metadata are defined by the [Sylph-tax documentation](https://sylph-docs.github.io/sylph-tax/).
+This automatic mode is mutually exclusive with the manual `--sylph_db` and
+`--sylph_taxonomy` inputs.
+
 ## Voyager profiling
 
 Voyager is an optional ONT-oriented corroboration method. It runs on the same
