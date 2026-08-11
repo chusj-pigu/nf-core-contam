@@ -22,10 +22,12 @@ input before alignment.
 
 ## Human read depletion
 
-Supply a human FASTA with `--fasta`, or choose a human iGenomes key with
-`--genome`. The default minimap2 preset is `lr:hq`; use `--minimap2_preset` only
-when another ONT preset is warranted. Secondary and supplementary records are
-excluded before conversion to compressed unmapped FASTQ.
+The default human reference is the UCSC hg38 iGenomes key (`--genome hg38`),
+resolved from `--igenomes_base`. Choose another configured iGenomes key with
+`--genome`, or supply `--fasta` to override iGenomes with a custom human FASTA.
+The default minimap2 preset is `lr:hq`; use `--minimap2_preset` only when another
+ONT preset is warranted. Secondary and supplementary records are excluded before
+conversion to compressed unmapped FASTQ.
 
 ## Kraken2 standard-database cache
 
@@ -38,7 +40,7 @@ instead of downloading and building the database again.
 nextflow run chusj-pigu/nf-core-contam \
     --input samplesheet.csv \
     --outdir results \
-    --fasta /shared/references/GRCh38.fa \
+    --genome hg38 \
     --kraken2_db_cache_dir /shared/kraken2-cache \
     --skip_sylph true \
     -profile apptainer
@@ -56,7 +58,7 @@ Use `--force` to deliberately rebuild and replace the cached standard database:
 nextflow run chusj-pigu/nf-core-contam \
     --input samplesheet.csv \
     --outdir results \
-    --fasta /shared/references/GRCh38.fa \
+    --genome hg38 \
     --kraken2_db_cache_dir /shared/kraken2-cache \
     --force true \
     --skip_sylph true \
@@ -76,7 +78,7 @@ profile, which MultiQC presents as the Sylph-tax section.
 nextflow run chusj-pigu/nf-core-contam \
     --input samplesheet.csv \
     --outdir results \
-    --fasta /shared/references/GRCh38.fa \
+    --genome hg38 \
     --kraken2_db_cache_dir /shared/kraken2-cache \
     --sylph_db /shared/sylph/database.syldb \
     --sylph_taxonomy /shared/sylph/taxonomy.tsv.gz \
@@ -162,7 +164,7 @@ The typical command for running the pipeline is as follows:
 nextflow run chusj-pigu/nf-core-contam \
     --input ./samplesheet.csv \
     --outdir ./results \
-    --fasta /shared/references/GRCh38.fa \
+    --genome hg38 \
     --kraken2_db_cache_dir /shared/kraken2-cache \
     --sylph_db /shared/sylph/database.syldb \
     --sylph_taxonomy /shared/sylph/taxonomy.tsv.gz \
