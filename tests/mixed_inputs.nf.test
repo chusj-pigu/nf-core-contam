@@ -1,0 +1,44 @@
+nextflow_pipeline {
+
+    name "Test mixed direct-file and directory inputs"
+    script "../main.nf"
+    tag "pipeline"
+    tag "mixed_inputs"
+
+    test("Direct ONT FASTQ and recursive fastq_pass directory") {
+
+        config "../conf/test.config"
+
+        when {
+            def samplesheet = path("$outputDir/mixed_inputs.csv")
+            samplesheet.text = """sample,fastq_1,fastq_2
+                direct_read,${projectDir}/assets/test_mixed_inputs/direct.fastq.gz,
+                directory_read,${projectDir}/assets/test_mixed_inputs/run/fastq_pass/,
+            """.stripIndent().trim()
+
+            params {
+                input  = samplesheet.toString()
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            def direct_alignment = path("$outputDir/minimap2/direct_read.human.bam")
+            def directory_alignment = path("$outputDir/minimap2/directory_read.human.bam")
+            def directory_fastqc_1 = path("$outputDir/fastqc/directory_read_1_fastqc.html")
+            def directory_fastqc_2 = path("$outputDir/fastqc/directory_read_2_fastqc.html")
+            def multiqc_report = path("$outputDir/multiqc/multiqc_report.html")
+            def versions = path("$outputDir/pipeline_info/nf-core-contam_software_mqc_versions.yml")
+
+            assertAll(
+                { assert workflow.success },
+                { assert direct_alignment.exists() },
+                { assert directory_alignment.exists() },
+                { assert directory_fastqc_1.exists() },
+                { assert directory_fastqc_2.exists() },
+                { assert multiqc_report.exists() },
+                { assert snapshot(removeNextflowVersion(versions.toString())).match() }
+            )
+        }
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "Direct ONT FASTQ and recursive fastq_pass directory": {
+        "content": [
+            {
+                "FASTQC": {
+                    "fastqc": "0.12.1"
+                },
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.30-r1287"
+                },
+                "SAMTOOLS_FASTQ": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_VIEW": {
+                    "samtools": 1.24
+                },
+                "Workflow": {
+                    "chusj-pigu/nf-core-contam": "v1.0.0dev"
+                }
+            }
+        ],
+        "timestamp": "2026-08-11T13:07:46.612263631",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.6"
+        }
+    }
+}

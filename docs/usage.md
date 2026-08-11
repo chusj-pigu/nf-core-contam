@@ -14,8 +14,11 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
-Only single-read ONT input is supported. Supply either a gzipped ONT FASTQ or a
-uBAM (`.bam`) in `fastq_1`, and leave `fastq_2` blank for every sample. The
+Only single-read ONT input is supported. Supply a gzipped ONT FASTQ, a uBAM
+(`.bam`), or a directory containing ONT FASTQ files in `fastq_1`, and leave
+`fastq_2` blank for every sample. Directory inputs are searched recursively for
+`.fq.gz`, `.fastq.gz`, and `.bam` files, so a MinKNOW `fastq_pass` directory can
+be supplied directly. A samplesheet may mix direct files and directories. The
 pipeline first aligns reads to a human reference and sends only primary unmapped
 reads to Kraken2 and Sylph. FastQC runs for FASTQ inputs; minimap2 resets uBAM
 input before alignment.

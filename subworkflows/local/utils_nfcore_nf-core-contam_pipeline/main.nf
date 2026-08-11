@@ -94,8 +94,9 @@ workflow PIPELINE_INITIALISATION {
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
         .map {
             meta, fastq_1, fastq_2 ->
+                def input_reads = expandInputReads(fastq_1)
                 if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+                    return [ meta.id, meta + [ single_end:true ], input_reads ]
                 } else {
                     return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
                 }
@@ -196,6 +197,29 @@ def validateInputSamplesheet(input) {
     }
 
     return [ metas[0], fastqs ]
+}
+
+//
+// Expand an ONT FASTQ run directory recursively, while retaining direct FASTQ and uBAM inputs.
+//
+def expandInputReads(input_path) {
+    if (!input_path.isDirectory()) {
+        return [ input_path ]
+    }
+
+    def reads = []
+    java.nio.file.Files.walk(input_path).withCloseable { paths ->
+        paths.forEach { path ->
+            if (java.nio.file.Files.isRegularFile(path) && path.fileName.toString().matches('.*\\.f(ast)?q\\.gz$')) {
+                reads << path
+            }
+        }
+    }
+
+    if (!reads) {
+        error("No ONT FASTQ (.fq.gz or .fastq.gz) files were found in input directory: ${input_path}")
+    }
+    return reads.sort { a, b -> a.toString() <=> b.toString() }
 }
 //
 // Get attribute from genome config file e.g. fasta
