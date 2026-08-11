@@ -62,12 +62,16 @@ nextflow run chusj-pigu/nf-core-contam \
    -profile <docker/singularity/.../institute> \
    --input samplesheet.csv \
    --outdir <OUTDIR> \
-   --fasta <HUMAN_REFERENCE.fa> \
+   --genome hg38 \
    --kraken2_db_cache_dir <KRAKEN2_CACHE_DIR> \
    --sylph_db <SYLPH_DATABASE.syldb> \
    --sylph_taxonomy <SYLPH_TAXONOMY.tsv.gz> \
    --voyager_db <VOYAGER_INDEX.idx>
 ```
+
+The pipeline defaults to the configured UCSC hg38 iGenomes reference. Set
+`--genome` to another configured key, or provide `--fasta <HUMAN_REFERENCE.fa>`
+to use a custom reference instead.
 
 Voyager is optional. Download a published Voyager database archive, extract it,
 and pass the resulting `*.idx` file with `--voyager_db`; do not pass the archive
