@@ -112,7 +112,7 @@
                 },
                 "skip_kraken2": {
                     "type": ["boolean", "string"],
-                    "default": false,
+                    "default": "false",
                     "description": "Skip Kraken2 classification.",
                     "hidden": true,
                     "fa_icon": "fas fa-forward"
