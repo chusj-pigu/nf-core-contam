@@ -36,6 +36,9 @@ Kraken2 standard database with `kraken2-build --standard` and publishes it as
 `<cache-directory>/kraken2-standard`. Later runs validate the cache and reuse it
 instead of downloading and building the database again.
 
+To omit Kraken2 classification, use `--skip_kraken2` (with underscores). Do not
+use `--skip-kraken2`, which Nextflow treats as a different parameter.
+
 ```bash
 nextflow run chusj-pigu/nf-core-contam \
     --input samplesheet.csv \

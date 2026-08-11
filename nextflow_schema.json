@@ -111,8 +111,8 @@
                     "fa_icon": "fas fa-sync-alt"
                 },
                 "skip_kraken2": {
-                    "type": "boolean",
-                    "default": false,
+                    "type": ["boolean", "string"],
+                    "default": "false",
                     "description": "Skip Kraken2 classification.",
                     "hidden": true,
                     "fa_icon": "fas fa-forward"
