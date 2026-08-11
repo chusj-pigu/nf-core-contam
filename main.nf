@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { NF-CORE-CONTAM  } from './workflows/nf-core-contam'
+include { NF_CORE_CONTAM  } from './workflows/nf-core-contam'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_nf-core-contam_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_nf-core-contam_pipeline'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_nf-core-contam_pipeline'
@@ -27,7 +27,7 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_nf-c
 // TODO nf-core: Remove this line if you don't need a FASTA file
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+params.fasta = params.fasta ?: getGenomeAttribute('fasta')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,7 +38,7 @@ params.fasta = getGenomeAttribute('fasta')
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow CHUSJPIGU_NF-CORE-CONTAM {
+workflow CHUSJPIGU_NF_CORE_CONTAM {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -48,7 +48,7 @@ workflow CHUSJPIGU_NF-CORE-CONTAM {
     //
     // WORKFLOW: Run pipeline
     //
-    NF-CORE-CONTAM (
+    NF_CORE_CONTAM (
         samplesheet,
         params.multiqc_config,
         params.multiqc_logo,
@@ -56,7 +56,7 @@ workflow CHUSJPIGU_NF-CORE-CONTAM {
         params.outdir,
     )
     emit:
-    multiqc_report = NF-CORE-CONTAM.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = NF_CORE_CONTAM.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +85,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    CHUSJPIGU_NF-CORE-CONTAM (
+    CHUSJPIGU_NF_CORE_CONTAM (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
@@ -97,7 +97,7 @@ workflow {
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        CHUSJPIGU_NF-CORE-CONTAM.out.multiqc_report
+        CHUSJPIGU_NF_CORE_CONTAM.out.multiqc_report
     )
 }
 

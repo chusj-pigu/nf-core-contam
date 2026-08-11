@@ -1,0 +1,36 @@
+{
+    "uBAM input": {
+        "content": [
+            {
+                "MINIMAP2_ALIGN": {
+                    "minimap2": "2.30-r1287"
+                },
+                "SAMTOOLS_FASTQ": {
+                    "samtools": 1.24
+                },
+                "SAMTOOLS_VIEW": {
+                    "samtools": 1.24
+                },
+                "Workflow": {
+                    "chusj-pigu/nf-core-contam": "v1.0.0dev"
+                }
+            },
+            [
+                "",
+                "test.human.bam"
+            ],
+            [
+                "",
+                "test.unmapped.bam",
+                "test.unmapped_1.fastq.gz",
+                "test.unmapped_other.fastq.gz",
+                "test.unmapped_singleton.fastq.gz"
+            ]
+        ],
+        "timestamp": "2026-08-04T13:22:32.634787835",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "25.10.4"
+        }
+    }
+}

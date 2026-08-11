@@ -1,0 +1,7 @@
+{
+    "database": "dolt",
+    "backend": "dolt",
+    "dolt_mode": "embedded",
+    "dolt_database": "contam",
+    "project_id": "6520a092-7b5d-4de6-bdc8-49bd42329e90"
+}

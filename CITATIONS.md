@@ -18,6 +18,26 @@
 
 > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
 
+- [minimap2](https://doi.org/10.1093/bioinformatics/bty191)
+
+> Li H. Minimap2: pairwise alignment for nucleotide sequences. Bioinformatics. 2018 Sep 15;34(18):3094-3100. doi: 10.1093/bioinformatics/bty191.
+
+- [SAMtools](https://doi.org/10.1093/bioinformatics/btp352)
+
+> Li H, Handsaker B, Wysoker A, Fennell T, Ruan J, Homer N, Marth G, Abecasis G, Durbin R. The Sequence Alignment/Map format and SAMtools. Bioinformatics. 2009 Aug 15;25(16):2078-2079. doi: 10.1093/bioinformatics/btp352.
+
+- [Sylph](https://doi.org/10.1038/s41587-024-02412-y)
+
+> Shaw J, Yu YW. Rapid species-level metagenome profiling and containment estimation with Sylph. Nature Biotechnology. 2024. doi: 10.1038/s41587-024-02412-y.
+
+- [Voyager](https://doi.org/10.1186/s13059-026-04235-3)
+
+> Branders S, Grabherr MG, Ahmad R. Voyager: rapid taxonomic characterization of long-read mixed-species sequencing samples in sorted motif distance space. Genome Biology. 2026. doi: 10.1186/s13059-026-04235-3.
+
+- [Voyager index collection](https://doi.org/10.18710/GOCSTY)
+
+> Branders S, Grabherr MG, Ahmad R. Database Indexes for Voyager: Real-time Taxonomic Characterization of Long-read Mixed-species Sequencing Samples in Sorted Motif Distance Space. DataverseNO, version 3.0, 2025. doi: 10.18710/GOCSTY.
+
 ## Software packaging/containerisation tools
 
 - [Anaconda](https://anaconda.com)

@@ -1,0 +1,36 @@
+nextflow_pipeline {
+
+    name "Test Voyager failure isolation and MultiQC integration"
+    script "../main.nf"
+    tag "pipeline"
+    tag "voyager"
+
+    test("Voyager failure does not stop the workflow") {
+
+        config "../conf/test_voyager.config"
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            def voyager_status = path("$outputDir/voyager/test.voyager_mqc.tsv")
+            def multiqc_report = path("$outputDir/multiqc/multiqc_report.html")
+            def multiqc_voyager = path("$outputDir/multiqc/multiqc_data/multiqc_test.voyager.txt")
+
+            assertAll(
+                { assert workflow.success },
+                { assert voyager_status.exists() },
+                { assert voyager_status.readLines()[1].contains('\tfailed\t') },
+                { assert multiqc_report.exists() },
+                { assert multiqc_voyager.exists() },
+                { assert multiqc_voyager.readLines()[1].contains('\tfailed\t') },
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf-core-contam_software_mqc_versions.yml")
+                ).match() }
+            )
+        }
+    }
+}

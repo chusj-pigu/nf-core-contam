@@ -14,39 +14,143 @@ You will need to create a samplesheet with information about the samples you wou
 --input '[path to samplesheet file]'
 ```
 
-### Multiple runs of the same sample
+Only single-read ONT input is supported. Supply either a gzipped ONT FASTQ or a
+uBAM (`.bam`) in `fastq_1`, and leave `fastq_2` blank for every sample. The
+pipeline first aligns reads to a human reference and sends only primary unmapped
+reads to Kraken2 and Sylph. FastQC runs for FASTQ inputs; minimap2 resets uBAM
+input before alignment.
 
-The `sample` identifiers have to be the same when you have re-sequenced the same sample more than once e.g. to increase sequencing depth. The pipeline will concatenate the raw reads before performing any downstream analysis. Below is an example for the same sample sequenced across 3 lanes:
+## Human read depletion
 
-```csv title="samplesheet.csv"
-sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L003_R1_001.fastq.gz,AEG588A1_S1_L003_R2_001.fastq.gz
-CONTROL_REP1,AEG588A1_S1_L004_R1_001.fastq.gz,AEG588A1_S1_L004_R2_001.fastq.gz
+Supply a human FASTA with `--fasta`, or choose a human iGenomes key with
+`--genome`. The default minimap2 preset is `lr:hq`; use `--minimap2_preset` only
+when another ONT preset is warranted. Secondary and supplementary records are
+excluded before conversion to compressed unmapped FASTQ.
+
+## Kraken2 standard-database cache
+
+Kraken2 classification requires `--kraken2_db_cache_dir`. The first run builds the
+Kraken2 standard database with `kraken2-build --standard` and publishes it as
+`<cache-directory>/kraken2-standard`. Later runs validate the cache and reuse it
+instead of downloading and building the database again.
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --fasta /shared/references/GRCh38.fa \
+    --kraken2_db_cache_dir /shared/kraken2-cache \
+    --skip_sylph true \
+    -profile apptainer
 ```
 
-### Full samplesheet
+The cache is considered valid only when it has the required Kraken2 `*.k2d`
+files. The standard database is built by the maintained nf-core
+`kraken2/buildstandard` component and is published only after that task succeeds.
+Put the cache on fast shared storage that every execution node can read; do not
+initialise the same cache directory from concurrent pipeline runs.
 
-The pipeline will auto-detect whether a sample is single- or paired-end using the information provided in the samplesheet. The samplesheet can have as many columns as you desire, however, there is a strict requirement for the first 3 columns to match those defined in the table below.
+Use `--force` to deliberately rebuild and replace the cached standard database:
 
-A final samplesheet file consisting of both single- and paired-end data may look something like the one below. This is for 6 samples, where `TREATMENT_REP3` has been sequenced twice.
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --fasta /shared/references/GRCh38.fa \
+    --kraken2_db_cache_dir /shared/kraken2-cache \
+    --force true \
+    --skip_sylph true \
+    -profile apptainer
+```
+
+## Sylph profiling
+
+Sylph runs alongside Kraken2 and needs a database and matching taxonomy metadata.
+For production, stage a pre-sketched Sylph database (`*.syldb`) on shared storage.
+A small raw FASTA collection is also accepted and sketched by Sylph, which is useful
+for testing or a deliberately custom database. The raw `*.tsv` profile is converted
+with the maintained nf-core `sylphtax/taxprof` component to a `*.sylphmpa` taxonomic
+profile, which MultiQC presents as the Sylph-tax section.
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --fasta /shared/references/GRCh38.fa \
+    --kraken2_db_cache_dir /shared/kraken2-cache \
+    --sylph_db /shared/sylph/database.syldb \
+    --sylph_taxonomy /shared/sylph/taxonomy.tsv.gz \
+    -profile apptainer
+```
+
+The taxonomy file must match the genomes in `--sylph_db`; otherwise Sylph-tax
+cannot assign the profile to taxa. To run only the Kraken2 branch, specify
+`--skip_sylph true`.
+
+## Voyager profiling
+
+Voyager is an optional ONT-oriented corroboration method. It runs on the same
+human-unmapped reads as Kraken2 and Sylph when `--voyager_db` points to an
+extracted `*.idx` file. Omit this parameter, or set `--skip_voyager true`, to
+run without Voyager. A Voyager task or container failure does not stop the
+primary classifier branches; a task that starts records its status in MultiQC.
+
+For the validated viral index, use the official [Voyager Dataverse collection](https://doi.org/10.18710/GOCSTY), release 3.0 (2025-04-07). The `viruses.tar.gz`
+download has official MD5 `d8843d19524abb0a7985bcb42c82b3b7`; despite its
+filename it is an uncompressed tar archive, so extract it with `tar -xf`.
+The extracted `viruses/viruses.idx` has MD5
+`a67aa3bec9685cdce40ec1d8c742b5d9` and declares index version `v0.1.4`.
+This pipeline pins `bioconda::voyager=0.1.4` and validated that exact container
+against this index.
+
+```bash
+curl -L --fail -o viruses.tar.gz \
+    https://dataverse.no/api/access/datafile/246907
+echo 'd8843d19524abb0a7985bcb42c82b3b7  viruses.tar.gz' | md5sum -c -
+tar -xf viruses.tar.gz
+echo 'a67aa3bec9685cdce40ec1d8c742b5d9  viruses/viruses.idx' | md5sum -c -
+```
+
+On Rorqual, download and verify this archive from a network-enabled transfer
+host, then retain the extracted index on project storage, for example
+`/project/<allocation>/contam/voyager/viruses-v0.1.4/viruses.idx`. Do not place
+the production database in the repository or rely on compute-node downloads.
+Launch with:
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --fasta /project/<allocation>/references/GRCh38.fa \
+    --kraken2_db_cache_dir /project/<allocation>/contam/kraken2-cache \
+    --sylph_db /project/<allocation>/contam/sylph/database.syldb \
+    --sylph_taxonomy /project/<allocation>/contam/sylph/taxonomy.tsv.gz \
+    --voyager_db /project/<allocation>/contam/voyager/viruses-v0.1.4/viruses.idx \
+    -profile apptainer
+```
+
+The small `assets/test_voyager_viruses.idx` fixture originates from this same
+verified archive. It is only for automated successful-profile coverage and is
+not a substitute for a broad production bacterial or viral index.
+
+### Samplesheet
+
+The pipeline accepts one or more ONT FASTQ files per sample, or one uBAM per
+sample. The first three columns must be present, and `fastq_2` must be empty.
+Do not mix FASTQ and uBAM records for the same sample.
 
 ```csv title="samplesheet.csv"
 sample,fastq_1,fastq_2
-CONTROL_REP1,AEG588A1_S1_L002_R1_001.fastq.gz,AEG588A1_S1_L002_R2_001.fastq.gz
-CONTROL_REP2,AEG588A2_S2_L002_R1_001.fastq.gz,AEG588A2_S2_L002_R2_001.fastq.gz
-CONTROL_REP3,AEG588A3_S3_L002_R1_001.fastq.gz,AEG588A3_S3_L002_R2_001.fastq.gz
-TREATMENT_REP1,AEG588A4_S4_L003_R1_001.fastq.gz,
-TREATMENT_REP2,AEG588A5_S5_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L003_R1_001.fastq.gz,
-TREATMENT_REP3,AEG588A6_S6_L004_R1_001.fastq.gz,
+SAMPLE_1,SAMPLE_1_run1.fastq.gz,
+SAMPLE_1,SAMPLE_1_run2.fastq.gz,
+SAMPLE_2,SAMPLE_2.fastq.gz,
 ```
 
 | Column    | Description                                                                                                                                                                            |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sample`  | Custom sample name. This entry will be identical for multiple sequencing libraries/runs from the same sample. Spaces in sample names are automatically converted to underscores (`_`). |
-| `fastq_1` | Full path to FastQ file for Illumina short reads 1. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
-| `fastq_2` | Full path to FastQ file for Illumina short reads 2. File has to be gzipped and have the extension ".fastq.gz" or ".fq.gz".                                                             |
+| `fastq_1` | Full path to one ONT FASTQ (`.fastq.gz` / `.fq.gz`) or uBAM (`.bam`).                                                                                                                  |
+| `fastq_2` | Required blank placeholder; paired-end reads are not supported.                                                                                                                        |
 
 An [example samplesheet](../assets/samplesheet.csv) has been provided with the pipeline.
 
@@ -55,7 +159,14 @@ An [example samplesheet](../assets/samplesheet.csv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run chusj-pigu/nf-core-contam --input ./samplesheet.csv --outdir ./results --genome GRCh37 -profile docker
+nextflow run chusj-pigu/nf-core-contam \
+    --input ./samplesheet.csv \
+    --outdir ./results \
+    --fasta /shared/references/GRCh38.fa \
+    --kraken2_db_cache_dir /shared/kraken2-cache \
+    --sylph_db /shared/sylph/database.syldb \
+    --sylph_taxonomy /shared/sylph/taxonomy.tsv.gz \
+    -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -85,10 +196,12 @@ nextflow run chusj-pigu/nf-core-contam -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
-outdir: './results/'
-genome: 'GRCh37'
-<...>
+input: "./samplesheet.csv"
+outdir: "./results/"
+fasta: "/shared/references/GRCh38.fa"
+kraken2_db_cache_dir: "/shared/kraken2-cache"
+sylph_db: "/shared/sylph/database.syldb"
+sylph_taxonomy: "/shared/sylph/taxonomy.tsv.gz"
 ```
 
 You can also generate such `YAML`/`JSON` files via [nf-core/launch](https://nf-co.re/launch).

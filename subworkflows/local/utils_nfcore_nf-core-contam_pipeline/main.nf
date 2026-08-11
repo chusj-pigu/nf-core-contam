@@ -60,7 +60,7 @@ workflow PIPELINE_INITIALISATION {
         before_text = before_text.replaceAll(/\033\[[0-9;]*m/, '')
     }
 
-    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR>"
+    command = "nextflow run ${workflow.manifest.name} -profile <docker/singularity/.../institute> --input samplesheet.csv --outdir <OUTDIR> --kraken2_db_cache_dir <KRAKEN2_CACHE_DIR> --sylph_db <SYLPH_DATABASE.syldb> --sylph_taxonomy <SYLPH_TAXONOMY.tsv.gz>"
 
     UTILS_NFSCHEMA_PLUGIN (
         workflow,
@@ -170,6 +170,9 @@ workflow PIPELINE_COMPLETION {
 //
 def validateInputParameters() {
     genomeExistsError()
+    if (!params.fasta) {
+        error('A human reference FASTA is required. Set --fasta to a human reference or select a human iGenomes key with --genome.')
+    }
 }
 
 //
@@ -182,6 +185,14 @@ def validateInputSamplesheet(input) {
     def endedness_ok = metas.collect{ meta -> meta.single_end }.unique().size == 1
     if (!endedness_ok) {
         error("Please check input samplesheet -> Multiple runs of a sample must be of the same datatype i.e. single-end or paired-end: ${metas[0].id}")
+    }
+    if (!metas[0].single_end) {
+        error("Only single-end ONT reads are supported. Leave fastq_2 blank for sample: ${metas[0].id}")
+    }
+    def input_files = fastqs.flatten()
+    def ubam_inputs = input_files.findAll { read -> read.name.matches('.*\\.bam$') }
+    if (ubam_inputs && input_files.size() != 1) {
+        error("A uBAM must be the only input file for sample: ${metas[0].id}")
     }
 
     return [ metas[0], fastqs ]

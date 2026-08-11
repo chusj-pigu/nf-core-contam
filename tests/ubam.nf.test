@@ -1,0 +1,36 @@
+nextflow_pipeline {
+
+    name "Test uBAM human read depletion"
+    script "../main.nf"
+    tag "pipeline"
+    tag "ubam"
+
+    test("uBAM input") {
+
+        config "../conf/test_ubam.config"
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+        }
+
+        then {
+            def alignment = path("$outputDir/minimap2/test.human.bam")
+            def unmapped_reads = path("$outputDir/samtools/test.unmapped_other.fastq.gz")
+            def fastqc = path("$outputDir/fastqc")
+
+            assertAll(
+                { assert workflow.success },
+                { assert alignment.exists() },
+                { assert unmapped_reads.exists() },
+                { assert !fastqc.exists() },
+                { assert snapshot(
+                    removeNextflowVersion("$outputDir/pipeline_info/nf-core-contam_software_mqc_versions.yml"),
+                    getAllFilesFromDir("$outputDir/minimap2", relative: true, includeDir: true),
+                    getAllFilesFromDir("$outputDir/samtools", relative: true, includeDir: true)
+                ).match() }
+            )
+        }
+    }
+}
