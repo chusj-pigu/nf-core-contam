@@ -56,7 +56,8 @@ workflow NF_CORE_CONTAM {
     //
     // MODULE: Classify reads against a reusable Kraken2 standard database
     //
-    if (!params.skip_kraken2) {
+    def skip_kraken2 = params.skip_kraken2 instanceof String ? params.skip_kraken2.toBoolean() : params.skip_kraken2
+    if (!skip_kraken2) {
         KRAKEN2_STANDARD_DATABASE()
         KRAKEN2_KRAKEN2(
             ch_unmapped_reads,
