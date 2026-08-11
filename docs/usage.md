@@ -6,6 +6,15 @@
 
 <!-- TODO nf-core: Add documentation about anything specific to running your pipeline. For general topics, please point to (and add to) the main nf-core website. -->
 
+## Working directory
+
+Nextflow task directories are controlled by `-work-dir` (or `-w`) and can be
+large because they retain staged reads, intermediate alignments, and downloaded
+database archives for `-resume`. Keep this directory separate from `--outdir`.
+For example, use `--outdir results -work-dir work`, not `--outdir results -w
+results`. Task hashes such as `ab/cdef...` in an output directory indicate that
+the output directory was also selected as the working directory.
+
 ## Samplesheet input
 
 You will need to create a samplesheet with information about the samples you would like to analyse before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row as shown in the examples below.
