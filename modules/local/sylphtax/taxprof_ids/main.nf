@@ -26,7 +26,11 @@ process SYLPHTAX_TAXPROF_IDS {
         ${args} \\
         -t ${taxonomies}
 
-    mv *.sylphmpa ${prefix}.sylphmpa
+    if compgen -G '*.sylphmpa' > /dev/null; then
+        mv *.sylphmpa ${prefix}.sylphmpa
+    else
+        touch ${prefix}.sylphmpa
+    fi
     """
 
     stub:
