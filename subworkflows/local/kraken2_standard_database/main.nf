@@ -31,6 +31,8 @@ workflow KRAKEN2_STANDARD_DATABASE {
 
 /*
  * The three *.k2d files are the minimum files Kraken2 needs to open a database.
+ * Accept both the pipeline-managed <cache>/kraken2-standard layout and a direct
+ * database directory supplied by users who have already provisioned a database.
  * The upstream builder is published only after its task completes successfully.
  */
 def standardKraken2Database(cache_dir) {
@@ -38,14 +40,23 @@ def standardKraken2Database(cache_dir) {
         error('A Kraken2 database cache is required. Set --kraken2_db_cache_dir to a writable shared directory.')
     }
 
-    def db = java.nio.file.Paths.get(cache_dir.toString()).toAbsolutePath().normalize().resolve('kraken2-standard')
+    def cache_path = java.nio.file.Paths.get(cache_dir.toString()).toAbsolutePath().normalize()
     def required_files = [
         'hash.k2d',
         'opts.k2d',
         'taxo.k2d'
     ]
 
+    def managed_db = cache_path.resolve('kraken2-standard')
+    if (isCompleteKraken2Database(managed_db, required_files)) {
+        return managed_db
+    }
+
+    return isCompleteKraken2Database(cache_path, required_files) ? cache_path : null
+}
+
+def isCompleteKraken2Database(db, required_files) {
     return java.nio.file.Files.isDirectory(db) && required_files.every { filename ->
         java.nio.file.Files.isRegularFile(db.resolve(filename))
-    } ? db : null
+    }
 }

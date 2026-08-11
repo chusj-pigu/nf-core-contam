@@ -36,7 +36,9 @@ conversion to compressed unmapped FASTQ.
 Kraken2 classification requires `--kraken2_db_cache_dir`. The first run builds the
 Kraken2 standard database with `kraken2-build --standard` and publishes it as
 `<cache-directory>/kraken2-standard`. Later runs validate the cache and reuse it
-instead of downloading and building the database again.
+instead of downloading and building the database again. You may also pass a
+pre-existing Kraken2 database directory directly, provided it contains
+`hash.k2d`, `opts.k2d`, and `taxo.k2d`.
 
 To omit Kraken2 classification, use `--skip_kraken2` (with underscores). Do not
 use `--skip-kraken2`, which Nextflow treats as a different parameter.
