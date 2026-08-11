@@ -164,6 +164,29 @@
                 }
             }
         },
+        "voyager_database_options": {
+            "title": "Voyager database options",
+            "type": "object",
+            "fa_icon": "fas fa-database",
+            "description": "Configure the optional Voyager long-read taxonomic profiling index.",
+            "properties": {
+                "voyager_db": {
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "^\\S+\\.idx$",
+                    "description": "Path to a pre-built Voyager *.idx taxonomic index.",
+                    "help_text": "Voyager is run only when this index is provided. Use a bacterial and/or viral index downloaded from the Voyager Dataverse collection. If the index is unavailable, the pipeline logs a warning and continues without Voyager; a failed Voyager task produces a failed-status row for MultiQC without stopping the workflow.",
+                    "fa_icon": "fas fa-database"
+                },
+                "skip_voyager": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip optional Voyager profiling.",
+                    "help_text": "Set this to suppress the Voyager stage and its warning when no Voyager index is supplied.",
+                    "fa_icon": "fas fa-forward"
+                }
+            }
+        },
         "institutional_config_options": {
             "title": "Institutional config options",
             "type": "object",
@@ -327,6 +350,9 @@
         },
         {
             "$ref": "#/$defs/sylph_database_options"
+        },
+        {
+            "$ref": "#/$defs/voyager_database_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

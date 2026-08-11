@@ -1,0 +1,35 @@
+nextflow_process {
+
+    name "Test Process VOYAGER_PROFILE"
+    script "../main.nf"
+    process "VOYAGER_PROFILE"
+    tag "modules"
+    tag "modules_local"
+    tag "voyager"
+    tag "voyager/profile"
+
+    test("ONT reads and Voyager index - stub") {
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [
+                    [ id:'test', single_end:true ],
+                    file(params.modules_testdata_base_path + 'genomics/sarscov2/illumina/fastq/test_1.fastq.gz', checkIfExists: true)
+                ]
+                input[1] = file("${projectDir}/assets/test_voyager_invalid.idx", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert path(process.out.profile[0][1]).exists() },
+                { assert path(process.out.multiqc[0][1]).readLines()[1].contains('\tsuccess\t') },
+                { assert path(process.out.log[0][1]).exists() }
+            )
+        }
+    }
+}

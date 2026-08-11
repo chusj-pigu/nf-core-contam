@@ -29,7 +29,8 @@
 2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
 3. Classify unmapped reads with a reusable Kraken2 standard database ([`Kraken2`](https://github.com/DerrickWood/kraken2/wiki/Manual))
 4. Profile unmapped microbial reads with Sylph ([`Sylph`](https://github.com/bluenote-1577/sylph))
-5. Present QC and classifier reports ([`MultiQC`](http://multiqc.info/))
+5. Optionally corroborate ONT taxonomic profiles with Voyager ([`Voyager`](https://bitbucket.org/sverre-phd-work/voyager/))
+6. Present QC and classifier reports ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
@@ -64,8 +65,14 @@ nextflow run chusj-pigu/nf-core-contam \
    --fasta <HUMAN_REFERENCE.fa> \
    --kraken2_db_cache_dir <KRAKEN2_CACHE_DIR> \
    --sylph_db <SYLPH_DATABASE.syldb> \
-   --sylph_taxonomy <SYLPH_TAXONOMY.tsv.gz>
+   --sylph_taxonomy <SYLPH_TAXONOMY.tsv.gz> \
+   --voyager_db <VOYAGER_INDEX.idx>
 ```
+
+Voyager is optional. Download a published Voyager database archive, extract it,
+and pass the resulting `*.idx` file with `--voyager_db`; do not pass the archive
+itself. If the option is omitted or the index cannot be found, the pipeline logs
+a warning and continues without Voyager.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/running/run-pipelines#using-parameter-files).

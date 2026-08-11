@@ -3,17 +3,18 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { KRAKEN2_KRAKEN2        } from '../modules/nf-core/kraken2/kraken2/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { SYLPH_PROFILE          } from '../modules/nf-core/sylph/profile/main'
-include { SYLPHTAX_TAXPROF       } from '../modules/nf-core/sylphtax/taxprof/main'
-include { HUMAN_READ_DEPLETION   } from '../subworkflows/local/human_read_depletion/main'
+include { FASTQC                    } from '../modules/nf-core/fastqc/main'
+include { KRAKEN2_KRAKEN2           } from '../modules/nf-core/kraken2/kraken2/main'
+include { MULTIQC                   } from '../modules/nf-core/multiqc/main'
+include { SYLPH_PROFILE             } from '../modules/nf-core/sylph/profile/main'
+include { SYLPHTAX_TAXPROF          } from '../modules/nf-core/sylphtax/taxprof/main'
+include { VOYAGER_PROFILE           } from '../modules/local/voyager/profile/main'
+include { HUMAN_READ_DEPLETION      } from '../subworkflows/local/human_read_depletion/main'
 include { KRAKEN2_STANDARD_DATABASE } from '../subworkflows/local/kraken2_standard_database/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nf-core-contam_pipeline'
+include { paramsSummaryMap          } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText    } from '../subworkflows/local/utils_nfcore_nf-core-contam_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -22,7 +23,6 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_nf-c
 */
 
 workflow NF_CORE_CONTAM {
-
     take:
     ch_samplesheet // channel: samplesheet read in from --input
     multiqc_config
@@ -38,10 +38,9 @@ workflow NF_CORE_CONTAM {
     //
     // SUBWORKFLOW: Deplete reads that align to the human reference
     //
-    def ch_human_reference = channel.value([
-        [id: params.genome ?: 'human'],
-        file(params.fasta, checkIfExists: true)
-    ])
+    def ch_human_reference = channel.value(
+        [[id: params.genome ?: 'human'], file(params.fasta, checkIfExists: true)]
+    )
     HUMAN_READ_DEPLETION(ch_samplesheet, ch_human_reference)
     def ch_unmapped_reads = HUMAN_READ_DEPLETION.out.unmapped_reads
 
@@ -52,7 +51,7 @@ workflow NF_CORE_CONTAM {
         reads.every { read -> read.name.matches('.*\\.f(ast)?q\\.gz$') }
     }
     FASTQC(ch_fastq_samples)
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map{ _meta, file -> file })
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map { _meta, file -> file })
 
     //
     // MODULE: Classify reads against a reusable Kraken2 standard database
@@ -63,7 +62,7 @@ workflow NF_CORE_CONTAM {
             ch_unmapped_reads,
             KRAKEN2_STANDARD_DATABASE.out.db.first(),
             params.save_kraken2_output_fastqs,
-            params.save_kraken2_read_assignments
+            params.save_kraken2_read_assignments,
         )
         ch_multiqc_files = ch_multiqc_files.mix(KRAKEN2_KRAKEN2.out.report.map { _meta, file -> file })
     }
@@ -88,6 +87,27 @@ workflow NF_CORE_CONTAM {
     }
 
     //
+    // MODULE: Profile unmapped ONT reads with Voyager when a pre-built index is supplied.
+    // Voyager is exploratory: missing or failed inputs produce a warning or failed-status row,
+    // while Kraken2, Sylph, and MultiQC continue to run.
+    //
+    if (!params.skip_voyager) {
+        if (!params.voyager_db) {
+            log.warn("[${workflow.manifest.name}] Voyager was not run because --voyager_db was not provided")
+        }
+        else {
+            def voyager_database = file(params.voyager_db)
+            if (!voyager_database.exists()) {
+                log.warn("[${workflow.manifest.name}] Voyager was not run because the index does not exist: ${params.voyager_db}")
+            }
+            else {
+                VOYAGER_PROFILE(ch_unmapped_reads, channel.value(voyager_database))
+                ch_multiqc_files = ch_multiqc_files.mix(VOYAGER_PROFILE.out.multiqc.map { _meta, file -> file })
+            }
+        }
+    }
+
+    //
     // Collate and save software versions
     //
     def topic_versions = channel.topic("versions")
@@ -99,9 +119,9 @@ workflow NF_CORE_CONTAM {
 
     def topic_versions_string = topic_versions.versions_tuple
         .map { process, tool, version ->
-            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+            [process[process.lastIndexOf(':') + 1..-1], "  ${tool}: ${version}"]
         }
-        .groupTuple(by:0)
+        .groupTuple(by: 0)
         .map { process, tool_versions ->
             tool_versions.unique().sort()
             "${process}:\n${tool_versions.join('\n')}"
@@ -111,9 +131,9 @@ workflow NF_CORE_CONTAM {
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${outdir}/pipeline_info",
-            name:  'nf-core-contam_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'nf-core-contam_software_' + 'mqc_' + 'versions.yml',
             sort: true,
-            newLine: true
+            newLine: true,
         )
 
     //
@@ -142,12 +162,8 @@ workflow NF_CORE_CONTAM {
             ]
         }
     )
-    emit:multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
-}
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
+    emit:
+    multiqc_report = MULTIQC.out.report.map { _meta, report -> [report] }.toList() // channel: /path/to/multiqc_report.html
+    versions       = ch_versions // channel: [ path(versions.yml) ]
+}

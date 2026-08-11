@@ -16,6 +16,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [FastQC](#fastqc) - Raw read QC
 - [Kraken2](#kraken2) - K-mer classification of unmapped reads against the standard database
 - [Sylph](#sylph) - ANI-aware microbial profiling of unmapped reads
+- [Voyager](#voyager) - Optional long-read taxonomic profiling of unmapped reads
 - [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
@@ -28,7 +29,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
   - `*.human.bam`: Coordinate-sorted alignments against the supplied human reference.
 - `samtools/`
   - `*.unmapped.bam`: Primary records without a human alignment.
-  - `*.unmapped_other.fastq.gz`: Unmapped ONT reads passed to Kraken2 and Sylph.
+  - `*.unmapped_other.fastq.gz`: Unmapped ONT reads passed to Kraken2, Sylph, and optional Voyager profiling.
 
 </details>
 
@@ -76,6 +77,24 @@ Kraken2 reports are included in the final MultiQC report.
 
 The final MultiQC report presents the `*.sylphmpa` files in its interactive
 Sylph-tax section.
+
+### Voyager
+
+<details markdown="1">
+<summary>Output files</summary>
+
+- `voyager/`
+  - `*.voyager.json`: Native per-sample Voyager taxonomic profiles when profiling succeeds.
+  - `*.voyager_mqc.tsv`: Per-sample Voyager execution status and global mapping metrics included as MultiQC custom content.
+  - `*.voyager*.log`: Voyager application, standard-output, and standard-error logs when available.
+
+</details>
+
+Voyager runs only when `--voyager_db` names a pre-built `*.idx` index. It is an
+optional ONT-specific corroboration method: if its database, container, or task
+fails, the pipeline continues and MultiQC records a failed Voyager status when
+the task starts. Interpret successful profiles as candidate contamination signals
+alongside the Kraken2 and Sylph results.
 
 ### MultiQC
 

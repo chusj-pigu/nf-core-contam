@@ -87,6 +87,52 @@ The taxonomy file must match the genomes in `--sylph_db`; otherwise Sylph-tax
 cannot assign the profile to taxa. To run only the Kraken2 branch, specify
 `--skip_sylph true`.
 
+## Voyager profiling
+
+Voyager is an optional ONT-oriented corroboration method. It runs on the same
+human-unmapped reads as Kraken2 and Sylph when `--voyager_db` points to an
+extracted `*.idx` file. Omit this parameter, or set `--skip_voyager true`, to
+run without Voyager. A Voyager task or container failure does not stop the
+primary classifier branches; a task that starts records its status in MultiQC.
+
+For the validated viral index, use the official [Voyager Dataverse collection](https://doi.org/10.18710/GOCSTY), release 3.0 (2025-04-07). The `viruses.tar.gz`
+download has official MD5 `d8843d19524abb0a7985bcb42c82b3b7`; despite its
+filename it is an uncompressed tar archive, so extract it with `tar -xf`.
+The extracted `viruses/viruses.idx` has MD5
+`a67aa3bec9685cdce40ec1d8c742b5d9` and declares index version `v0.1.4`.
+This pipeline pins `bioconda::voyager=0.1.4` and validated that exact container
+against this index.
+
+```bash
+curl -L --fail -o viruses.tar.gz \
+    https://dataverse.no/api/access/datafile/246907
+echo 'd8843d19524abb0a7985bcb42c82b3b7  viruses.tar.gz' | md5sum -c -
+tar -xf viruses.tar.gz
+echo 'a67aa3bec9685cdce40ec1d8c742b5d9  viruses/viruses.idx' | md5sum -c -
+```
+
+On Rorqual, download and verify this archive from a network-enabled transfer
+host, then retain the extracted index on project storage, for example
+`/project/<allocation>/contam/voyager/viruses-v0.1.4/viruses.idx`. Do not place
+the production database in the repository or rely on compute-node downloads.
+Launch with:
+
+```bash
+nextflow run chusj-pigu/nf-core-contam \
+    --input samplesheet.csv \
+    --outdir results \
+    --fasta /project/<allocation>/references/GRCh38.fa \
+    --kraken2_db_cache_dir /project/<allocation>/contam/kraken2-cache \
+    --sylph_db /project/<allocation>/contam/sylph/database.syldb \
+    --sylph_taxonomy /project/<allocation>/contam/sylph/taxonomy.tsv.gz \
+    --voyager_db /project/<allocation>/contam/voyager/viruses-v0.1.4/viruses.idx \
+    -profile apptainer
+```
+
+The small `assets/test_voyager_viruses.idx` fixture originates from this same
+verified archive. It is only for automated successful-profile coverage and is
+not a substitute for a broad production bacterial or viral index.
+
 ### Samplesheet
 
 The pipeline accepts one or more ONT FASTQ files per sample, or one uBAM per

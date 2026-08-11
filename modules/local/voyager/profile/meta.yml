@@ -1,0 +1,86 @@
+name: "voyager_profile"
+description: Profile long reads against a pre-built Voyager taxonomic index
+keywords:
+  - long-read
+  - nanopore
+  - taxonomic profiling
+  - metagenomics
+  - contamination
+  - voyager
+tools:
+  - voyager:
+      description: Rapid mapping of long reads with insertion and deletion errors in sorted motif distance space.
+      homepage: https://bitbucket.org/sverre-phd-work/voyager/
+      documentation: https://bitbucket.org/sverre-phd-work/voyager/wiki/Home
+      tool_dev_url: https://bitbucket.org/sverre-phd-work/voyager/
+      doi: 10.1186/s13059-026-04235-3
+      licence:
+        - "LGPL-3.0-only"
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing sample information, e.g. `[ id:'sample1', single_end:true ]`
+    - reads:
+        type: file
+        description: Input ONT reads in FASTQ or FASTA format.
+        pattern: "*.{fastq,fq,fasta,fa,fna,fastq.gz,fq.gz,fasta.gz,fa.gz,fna.gz}"
+        ontologies:
+          - edam: http://edamontology.org/format_1930 # FASTQ
+          - edam: http://edamontology.org/format_1929 # FASTA
+  - database:
+      type: file
+      description: Pre-built Voyager database index.
+      pattern: "*.idx"
+output:
+  profile:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information.
+      - "*.voyager.json":
+          type: file
+          description: Voyager taxonomic profile in JSON format when profiling succeeds.
+          pattern: "*.voyager.json"
+          optional: true
+          ontologies:
+            - edam: http://edamontology.org/format_3464 # JSON
+  multiqc:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information.
+      - "*.voyager_mqc.tsv":
+          type: file
+          description: Voyager execution status and global mapping metrics for MultiQC custom content.
+          pattern: "*.voyager_mqc.tsv"
+          ontologies:
+            - edam: http://edamontology.org/format_3475 # TSV
+  log:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information.
+      - "*.voyager*.log":
+          type: file
+          description: Voyager standard output, standard error, and application log files when available.
+          pattern: "*.voyager*.log"
+          optional: true
+          ontologies: []
+  versions_voyager:
+    - - ${task.process}:
+          type: string
+          description: The process the version was collected from.
+      - voyager:
+          type: string
+          description: Tool name.
+      - voyager-cli -v:
+          type: eval
+          description: Expression used to obtain the Voyager version.
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The process the version was collected from.
+      - voyager:
+          type: string
+          description: Tool name.
+      - voyager-cli -v:
+          type: eval
+          description: Expression used to obtain the Voyager version.
