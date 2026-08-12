@@ -2,10 +2,10 @@ process SYLPHTAX_TAXPROF_IDS {
     tag "${meta.id}"
     label 'process_medium'
 
-    conda "bioconda::sylph-tax=1.9.0"
+    conda "bioconda::sylph-tax=1.9.1"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
-        ? 'https://depot.galaxyproject.org/singularity/sylph-tax:1.9.0--pyhdfd78af_0'
-        : 'quay.io/biocontainers/sylph-tax:1.9.0--pyhdfd78af_0'}"
+        ? 'https://depot.galaxyproject.org/singularity/sylph-tax:1.9.1--pyhdfd78af_0'
+        : 'quay.io/biocontainers/sylph-tax:1.9.1--pyhdfd78af_0'}"
 
     input:
     tuple val(meta), path(sylph_results)

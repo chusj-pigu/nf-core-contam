@@ -223,7 +223,7 @@ def sylphDatabaseSpec(database_id, cache_dir) {
         'GTDB_r226': [filename: 'gtdb-r226-c200-dbv1.syldb', taxonomy_file: 'gtdb_r226_metadata.tsv.gz'],
         'GTDB_r220': [filename: 'gtdb-r220-c200-dbv1.syldb', taxonomy_file: 'gtdb_r220_metadata.tsv.gz'],
         'GTDB_r214': [filename: 'v0.3-c200-gtdb-r214.syldb', taxonomy_file: 'gtdb_r214_metadata.tsv.gz'],
-        'GlobDB_r232': [filename: 'globdb_r232_sylph_c200.syldb', taxonomy_file: 'globdb_r232_metadata.tsv.gz', url: 'https://fileshare.lisc.univie.ac.at/globdb/globdb_r232/taxonomic_profiling/globdb_r232_sylph_c200.syldb'],
+        'GlobDB_r232': [filename: 'globdb_r232_sylph_c200.syldb', taxonomy_file: 'globdb_r232_sylph_tax.tsv.gz', url: 'https://fileshare.lisc.univie.ac.at/globdb/globdb_r232/taxonomic_profiling/globdb_r232_sylph_c200.syldb'],
         'GlobDB_r226': [filename: 'globdb_r226_sylph_c200.syldb', taxonomy_file: 'globdb_r226_metadata.tsv.gz', url: 'https://fileshare.lisc.univie.ac.at/globdb/globdb_r226/taxonomic_profiling/globdb_r226_sylph_c200.syldb'],
         'OceanDNA': [filename: 'OceanDNA-c200-v0.3.syldb', taxonomy_file: 'ocean_dna_metadata.tsv.gz'],
         'SoilSMAG': [filename: 'SMAG-c200-v0.3.syldb', taxonomy_file: 'soil_smag_metadata.tsv.gz'],

@@ -126,7 +126,9 @@ nextflow run chusj-pigu/nf-core-contam \
 Supported identifiers are `GTDB_r232`, `GTDB_r226`, `GTDB_r220`, `GTDB_r214`,
 `GlobDB_r232`, `GlobDB_r226`, `OceanDNA`, `SoilSMAG`, `IMGVR_4.1`,
 `UHGV_default`, `UHGV_ictv`, `FungiRefSeq-latest`,
-`FungiRefSeq-2024-07-25`, and `TaraEukaryoticSMAG`. `GlobDB` sketches are
+`FungiRefSeq-2024-07-25`, and `TaraEukaryoticSMAG`. The automatic database
+path pins Sylph-tax 1.9.1, the first release that recognizes `GlobDB_r232`.
+`GlobDB` sketches are
 downloaded from their official University of Vienna host. Other sketches use
 the official Sylph mirror. Database identifiers and their matching taxonomy
 metadata are defined by the [Sylph-tax documentation](https://sylph-docs.github.io/sylph-tax/).

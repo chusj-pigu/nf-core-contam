@@ -18,9 +18,11 @@ nextflow_pipeline {
         }
 
         then {
-            def gtdb_database = path("$outputDir/sylph-cache-v2/gtdb-r226-c200-dbv1.syldb")
+            def globdb_database = path("$outputDir/sylph-cache-v2/globdb_r232_sylph_c200.syldb")
+            def fungi_database = path("$outputDir/sylph-cache-v2/fungi-refseq-2025-10-11-c200-dbv1.syldb")
             def imgvr_database = path("$outputDir/sylph-cache-v2/imgvr_c200_v0.3.0.syldb")
-            def gtdb_taxonomy = path("$outputDir/sylph-cache-v2/taxonomy/gtdb_r226_metadata.tsv.gz")
+            def globdb_taxonomy = path("$outputDir/sylph-cache-v2/taxonomy/globdb_r232_sylph_tax.tsv.gz")
+            def fungi_taxonomy = path("$outputDir/sylph-cache-v2/taxonomy/fungi_refseq_2025-10-11_metadata.tsv.gz")
             def imgvr_taxonomy = path("$outputDir/sylph-cache-v2/taxonomy/IMGVR_4.1_metadata.tsv.gz")
             def sylph_taxonomy = path("$outputDir/sylphtax")
             def multiqc_report = path("$outputDir/multiqc/multiqc_report.html")
@@ -28,9 +30,11 @@ nextflow_pipeline {
 
             assertAll(
                 { assert workflow.success },
-                { assert gtdb_database.exists() && gtdb_database.size() > 0 },
+                { assert globdb_database.exists() && globdb_database.size() > 0 },
+                { assert fungi_database.exists() && fungi_database.size() > 0 },
                 { assert imgvr_database.exists() && imgvr_database.size() > 0 },
-                { assert gtdb_taxonomy.exists() && gtdb_taxonomy.size() > 0 },
+                { assert globdb_taxonomy.exists() && globdb_taxonomy.size() > 0 },
+                { assert fungi_taxonomy.exists() && fungi_taxonomy.size() > 0 },
                 { assert imgvr_taxonomy.exists() && imgvr_taxonomy.size() > 0 },
                 { assert sylph_taxonomy.exists() },
                 { assert multiqc_report.exists() },

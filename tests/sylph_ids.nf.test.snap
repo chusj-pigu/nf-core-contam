@@ -15,7 +15,7 @@
                     "samtools": 1.24
                 },
                 "SYLPHTAX_TAXPROF_IDS": {
-                    "sylph-tax": "1.9.0"
+                    "sylph-tax": "1.9.1"
                 },
                 "SYLPH_PROFILE_IDS": {
                     "sylph": "0.9.0"
@@ -28,7 +28,7 @@
                 }
             }
         ],
-        "timestamp": "2026-08-11T14:13:20.362580064",
+        "timestamp": "2026-08-12T12:02:37.485759954",
         "meta": {
             "nf-test": "0.9.5",
             "nextflow": "26.04.6"
